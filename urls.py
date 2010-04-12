@@ -3,9 +3,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^is303/', include('is303.foo.urls')),
-
-    # Uncomment the next line to enable the admin:
+    (r'^$', include('is303.apps.distributed.urls')),
     (r'^admin/', include(admin.site.urls)),
 )
