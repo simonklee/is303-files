@@ -7,6 +7,6 @@ class Files(models.Model):
     uploaded to the server.
     
     '''
-    file = models.FileField(_('title'), upload_to='upload')
+    file = models.FileField(_('file'), upload_to='upload')
     uploaded = models.DateField(_('time uploaded'), auto_now_add=True)
     

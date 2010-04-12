@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% block subheader %} Files {% endblock %}
+
+<p>simple file upload<p>
+{% if form.is_multipart %}
+<p>Is multipart</p>
+{% endif %}
+<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
+    {{ form }}
+    <input type="submit" value="upload" />
+</form>
+<p>{{ message }} </p>
+{% endblock %}
