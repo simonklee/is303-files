@@ -10,12 +10,13 @@ def simple(request, template_name, **kwargs):
     simple file upload view.
     
     '''
+    message = 'invalid'
     if request.method == 'POST':
         form = FilesForm(request.POST, request.FILES)
         if form.is_valid():
             message = 'Form was valid!'
     else:
         form = FilesForm()
-        message = 'invalid'
+        
     return render_to_response(template_name, {'form': form, 'message': message },
                        context_instance=RequestContext(request))
