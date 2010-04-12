@@ -28,7 +28,8 @@ class ProgressUploadHandler(FileUploadHandler):
         self.progress_id = None
         self.cach_key = None
 
-    def handle_raw_input(self, input_data, META, content_length, boundary, encoding):
+    def handle_raw_input(self, input_data, META, content_length, boundary,
+                         encoding):
         '''
         Allows the handler to completely override the parsing of the raw
         HTTP input.
@@ -97,7 +98,8 @@ class ProgressUploadHandler(FileUploadHandler):
                 percent = min(100, int(100 * self.progress / self.content_length))
                 cache.incr(self.cach_key, percent)
             except ValueError, e:
-                logging.error('Tried to increment a nonexcisting cache-key; %s' % self.cach_key) 
+                logging.error('Tried to increment a non-existing cache-key;\
+                              %s %s' % (self.cach_key, e)) 
                 
         return raw_data
         
@@ -113,4 +115,5 @@ class ProgressUploadHandler(FileUploadHandler):
         Callback signaling that the entire upload (all files) has completed.
         '''
         if settings.DEBUG:
-            logging.debug('Upload for %s and %s was completed' % (self.field_name, self.cach_key))
+            logging.debug('Upload for %s and %s was completed'
+                          % (self.field_name, self.cach_key))
