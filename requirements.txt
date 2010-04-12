@@ -1,0 +1,16 @@
+Sphinx>=0.6.5
+docutils==0.6
+python-dateutil>=1.5
+ipython>=0.10
+simplejson>=2.1.1
+amqplib>=0.6.1
+anyjson>=0.2.3
+billiard>=0.2.3
+carrot>=0.10.3
+ghettoq>=0.1.2
+django-picklefield>=0.1.5
+
+svn+http://code.djangoproject.com/svn/django/trunk/
+
+git+git://github.com/IanLewis/jogging.git
+git+git://github.com/ask/celery.git

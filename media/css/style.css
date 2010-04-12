@@ -1,0 +1,141 @@
+* {
+    margin: 0;
+    padding: 0;
+    }
+body{
+    min-width: 950px;
+    text-align: center;
+    margin-bottom: 30px;
+    background: #adadad;
+    }
+h1, h2, h3{
+    display: block;
+    margin-bottom: 3px;
+    margin-top: 15px;
+    clear: both;
+    }
+h1{
+    color: #2e7306;
+    }
+h2, h3, h4{
+    color: #666;
+    }
+a{
+    color: #fdcc07;
+    }
+#content a, #popcontent a{
+    color: #9a6900;
+    }
+a:hover, a:active{
+    color: #f1f1f1;
+    /* background: url(../gfx/link-underline.gif) 100% 90% repeat-x; */
+    }
+a:hover img, a:active img{
+    background: none;
+    }
+/* images */
+img{
+    border: 0;
+    }
+img.left{
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 15px;
+    }
+img.center{
+    display: block;
+    clear: both;
+    margin: 15px auto;
+    }
+img.right{
+    float: right;
+    margin-bottom: 15px;
+    margin-left: 10px;
+    }
+img.border{
+    border: solid 5px #222;
+    }
+/* lists */
+ol, #content ul{
+    list-style: none;
+    margin: 5px 0 15px 0;
+    }
+ol li, #content ul li{
+    margin-bottom: 2px;
+    }
+dl.indent dd{
+    padding-left: 10px;
+    }
+dl.indent dt, dl.indent{
+    margin-top: 3px;
+    }
+small{
+    display: block;
+    }
+table{
+    border-spacing: 0;
+    font-size: small;
+    }
+label{
+    font-weight: bold;
+    color: #333;
+    }
+dd{
+    margin-bottom: 5px;
+    }
+dt{
+    font-weight: normal !important;
+    }
+select{
+    border: 1px solid #ccc;
+    font-size: 1.2em;
+    }
+option{
+    padding-right: 12px;
+    }
+    
+
+body{
+    font: 62.5%/1.6em Arial, Helvetica, Verdana, sans-serif;
+    }
+a{
+    text-decoration: none;
+    }
+a:hover, a:active{
+    text-decoration: underline;
+    }
+ol{
+    font-size: 1.6em;
+    }
+.textright{
+    text-align: right;
+    }
+caption{
+    text-align: left;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 4px;
+    }
+h1{
+    font-size: 3.2em;
+    }
+h2{
+    display: block;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    font-size: 2.5em;
+    font-weight: 200;
+    line-height: 1.0em;
+    }
+h3, #calendar caption{
+    font-size: 1.6em;
+    font-weight: 100;
+    margin-bottom: 3px;
+    line-height: 1.2em;
+    }
+
+h4{
+    font-size: 1.3em;
+    font-weight: 100;
+    }
+
