@@ -9,10 +9,10 @@ billiard>=0.2.3
 carrot>=0.10.3
 ghettoq>=0.1.2
 django-picklefield>=0.1.5
+django-extensions==0.4.1
 
 svn+http://code.djangoproject.com/svn/django/trunk/
 hg+http://bitbucket.org/andrewgodwin/south/#egg=South
-
-
 git+git://github.com/IanLewis/jogging.git
 git+git://github.com/ask/celery.git
+git+git://github.com/django-extensions/django-extensions.git
