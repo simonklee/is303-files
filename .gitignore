@@ -1,0 +1,5 @@
+*.pyc
+*logs*
+ve
+pip-log*
+settings.py
