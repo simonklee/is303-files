@@ -11,6 +11,8 @@ ghettoq>=0.1.2
 django-picklefield>=0.1.5
 
 svn+http://code.djangoproject.com/svn/django/trunk/
+hg+http://bitbucket.org/andrewgodwin/south/#egg=South
+
 
 git+git://github.com/IanLewis/jogging.git
 git+git://github.com/ask/celery.git

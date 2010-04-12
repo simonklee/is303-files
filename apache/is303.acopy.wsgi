@@ -5,11 +5,10 @@ project = os.path.dirname(apache_configuration)
 workspace = os.path.dirname(project)
 
 sys.path.append(workspace)
-site.addsitedir('/home/acopy/django/trafo/ve/lib/python2.6/site-packages')
-#sys.path.append('/usr/lib/python2.6/dist-packages/django')
-sys.path.append('/home/acopy/django/trafo')
+site.addsitedir('/home/acopy/django/is303/ve/lib/python2.6/site-packages')
+sys.path.append('/home/acopy/django/is303')
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'trafo.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'is303.settings'
 
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
