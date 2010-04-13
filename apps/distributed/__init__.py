@@ -46,6 +46,13 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         if 'progress-id' in self.request.GET and content_length > 0:
             self.progress_id = self.request.GET['progress-id']
+            
+            if settings.DEBUG:
+                logging.debug('progress-id was %s and content_length %s'
+                          % (self.progress_id, self.content_lenght))
+        else:
+            if settings.DEBUG:
+                logging.debug('Upload not containing progress_id')
         return None
     
     def new_file (self, field_name, file_name, content_type, content_length,
@@ -69,10 +76,10 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         if self.progress_id:
             self.cach_key = '%s_%s_%s' % (self.request.META['REMOTE_ADDR'],
-                self.progress_id, field_name)
+                self.progress_id, file_name)
             cache.set(self.cach_key, 0, 360)
     
-    def recieve_data_chunk(self, raw_data, start):
+    def receive_data_chunk(self, raw_data, start):
         '''
         Receives a "chunk" of data from the file upload.
         
@@ -116,4 +123,4 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         if settings.DEBUG:
             logging.debug('Upload for %s and %s was completed'
-                          % (self.field_name, self.cach_key))
+                          % (self.file_name, self.cach_key))

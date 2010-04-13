@@ -5,9 +5,11 @@ import views as distributed_views
 
 urlpatterns = patterns('',
     url(r'^$', direct_to_template,
-    {'template': 'distributed/index.html'}),
+        {'template': 'distributed/index.html'}
+    ),
     
     url(r'^upload_simple/$', distributed_views.simple,
-    kwargs = {'template_name': 'distributed/distributed_simple.html'},
-    name = 'distributed_simple')
+        kwargs = {'template_name': 'distributed/distributed_simple.html'},
+        name = 'distributed_simple'
+    ),
 )    
