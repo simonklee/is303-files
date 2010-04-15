@@ -1,3 +1,5 @@
+import time as ctime
+
 from django.core.files.uploadhandler import FileUploadHandler
 from django.core.cache import cache
 from django.conf import settings
@@ -25,6 +27,8 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         super(ProgressUploadHandler, self).__init__(request)
         self.progress = 0
+        self.length = 0
+        self.name = None
         self.progress_id = None
         self.cach_key = None
 
@@ -46,13 +50,13 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         if 'progress-id' in self.request.GET and content_length > 0:
             self.progress_id = self.request.GET['progress-id']
+            self.length = content_length
             
             if settings.DEBUG:
-                logging.debug('progress-id was %s and content_length %s'
-                          % (self.progress_id, self.content_lenght))
-        else:
-            if settings.DEBUG:
-                logging.debug('Upload not containing progress_id')
+                logging.debug('progress-id was %s and content_length %s @ %s'
+                          % (self.progress_id, self.length, ctime.ctime()))
+        elif settings.DEBUG:
+            logging.debug('Upload not containing progress_id')
         return None
     
     def new_file (self, field_name, file_name, content_type, content_length,
@@ -78,6 +82,10 @@ class ProgressUploadHandler(FileUploadHandler):
             self.cach_key = '%s_%s_%s' % (self.request.META['REMOTE_ADDR'],
                 self.progress_id, file_name)
             cache.set(self.cach_key, 0, 360)
+            self.name = file_name
+            if settings.DEBUG:
+                logging.debug('Upload started key %s and filename %s @ %s'
+                          % (self.cach_key, self.name, ctime.ctime()))
     
     def receive_data_chunk(self, raw_data, start):
         '''
@@ -102,8 +110,11 @@ class ProgressUploadHandler(FileUploadHandler):
         self.progress += self.chunk_size
         if self.cach_key:
             try:
-                percent = min(100, int(100 * self.progress / self.content_length))
+                percent = min(100, int(100 * self.progress / self.length))
                 cache.incr(self.cach_key, percent)
+                if settings.DEBUG:
+                    logging.debug('uploaded proceeded for %s and filename %s @ %s'
+                          % (self.cach_key, self.name, ctime.ctime()))
             except ValueError, e:
                 logging.error('Tried to increment a non-existing cache-key;\
                               %s %s' % (self.cach_key, e)) 
@@ -122,5 +133,5 @@ class ProgressUploadHandler(FileUploadHandler):
         Callback signaling that the entire upload (all files) has completed.
         '''
         if settings.DEBUG:
-            logging.debug('Upload for %s and %s was completed'
-                          % (self.file_name, self.cach_key))
+            logging.debug('Upload for %s and %s was completed @ %s'
+                          % (self.file_name, self.cach_key, ctime.ctime()))

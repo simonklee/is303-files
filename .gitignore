@@ -4,3 +4,7 @@ ve
 pip-log*
 settings.py
 tmp/
+*~
+#*
+*#
+paths.txt

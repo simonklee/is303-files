@@ -9,8 +9,21 @@
 {% endif %}
 <form enctype="multipart/form-data" method="post" action="{% url distributed_simple %}">
     {% csrf_token %}
-    {{ form }}
+    {{ form.as_ul }}
     <input type="submit" value="upload" />
 </form>
 <p>{{ message }} </p>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
+<script type="text/javascript">
+var uuid = function() {
+    var u = '';
+    for(var i = 0; i < 32; i++) {
+        u += Math.floor(Math.random() * 16).toString(16)
+    }
+    return u
+}();
+    $('form').attr('action', function() {
+        return $(this).attr('action')+'?progress-id=' + uuid;
+    });
+</script>
 {% endblock %}
