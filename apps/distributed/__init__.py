@@ -47,13 +47,13 @@ class ProgressUploadHandler(FileUploadHandler):
         ``boundary`` is the MIME boundary for this request.
 
         ``encoding`` is the encoding of the request.
+
         '''
-        if 'progress-id' in self.request.GET and content_length > 0:
-            self.progress_id = self.request.GET['progress-id']
+        if 'X-Progress-Id' in self.request.GET and content_length > 0:
+            self.progress_id = self.request.GET['X-Progress-Id']
             self.length = content_length
-            
             if settings.DEBUG:
-                logging.debug('progress-id was %s and content_length %s @ %s'
+                logging.debug('X-Progress-Id was %s and content_length %s @ %s'
                           % (self.progress_id, self.length, ctime.ctime()))
         elif settings.DEBUG:
             logging.debug('Upload not containing progress_id')
@@ -77,6 +77,7 @@ class ProgressUploadHandler(FileUploadHandler):
         
         ``charset`` is the character set (i.e. utf8) given by the browser.
         Like content_length, this sometimes wonn't be provided.
+
         '''
         if self.progress_id:
             self.cach_key = '%s_%s_%s' % (self.request.META['REMOTE_ADDR'],
@@ -106,6 +107,7 @@ class ProgressUploadHandler(FileUploadHandler):
         
         If you raise a StopUpload or a SkipFile exception, the upload will
         abort or the file will be completely skipped.
+
         '''
         self.progress += self.chunk_size
         if self.cach_key:
@@ -125,13 +127,15 @@ class ProgressUploadHandler(FileUploadHandler):
         '''
         return None to indicate that the UploadedFile object should come from
         subsequent upload handlers.
+
         '''
         return None
     
     def upload_complete(self):
         '''
         Callback signaling that the entire upload (all files) has completed.
+
         '''
         if settings.DEBUG:
             logging.debug('Upload for %s and %s was completed @ %s'
-                          % (self.file_name, self.cach_key, ctime.ctime()))
+                          % (self.name, self.cach_key, ctime.ctime()))

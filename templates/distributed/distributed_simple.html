@@ -23,7 +23,7 @@ var uuid = function() {
     return u
 }();
     $('form').attr('action', function() {
-        return $(this).attr('action')+'?progress-id=' + uuid;
+        return $(this).attr('action')+'?X-Progress-Id=' + uuid;
     });
 </script>
 {% endblock %}

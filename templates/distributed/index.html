@@ -2,6 +2,9 @@
 
 {% block content %}
 {% block subheader %} Overview {% endblock %}
-
-<p>Overview of different tests.</p>
+<ol>
+<li><a href={% url distributed_simple %} title="distributed_simple">distributed_simple</a></li>
+<li><a href={% url suspend_task %} title="suspend_task">suspend_task</a></li>
+<li><a href={% url suspend_test %} title="suspend_test">suspend_test</a></li>
+</ol>
 {% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Test{% endblock %}
+{% block subheader %}Test{% endblock %}
+{% block content %}
+
+<p id="dots">0</p>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+<script type="text/javascript">
+    var task_id;
+    var intervalID;
+    
+    $.get('{% url suspend_task %}', {json: "true", time: "300.0"},
+        function(data) {
+            task_id = data.task_id;
+            $('#dots').after('<dl><dt><strong>task_id: </strong></dt> \
+                             <dd>' + task_id + '</dd>');
+            $('#dots').after('<dt><strong>status: </strong></dt> \
+                        <dd id="status_val">' + data.status + '</dd></dl>');
+            
+            // Make a XMLHttpRequest every second to update the status
+            intervalID = setInterval(getStatus, 1000); 
+        }
+    );
+    
+    var count = 0;
+    function getStatus() {
+        count++;
+        $('#dots').text(count + 'sec');  
+        $.getJSON('{% url suspend_task %}' + task_id, function(data) {
+            $('#status_val').text(data.status);
+            if (data.status == 'SUCCESS') {
+                $('#dots').append(' STOP');
+                clearInterval(intervalID);
+            }
+        });
+    }
+</script>
+{% endblock %}
