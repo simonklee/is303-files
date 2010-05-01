@@ -1,10 +1,15 @@
-from django import forms
-from models import Files
+from django.forms import ModelForm
+from apps.distributed.models import Files, Video
 
-class FilesForm(forms.ModelForm):
-    '''
-    A forms for files model.
-    '''
+
+class FilesForm(ModelForm):
+
     class Meta:
         model = Files
-    
+
+
+class VideoForm(ModelForm):
+
+    class Meta:
+        model = Video
+        exclude = ('converted',)

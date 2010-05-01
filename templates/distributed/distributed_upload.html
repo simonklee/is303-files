@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Upload Files{% endblock %}
+{% block content %}
+
+<form enctype="multipart/form-data" method="post" action="{% url video_upload %}">{% csrf_token %}
+    {{ form.as_ul }}
+    <input type=submit value=upload>
+</form>
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
+{% endblock %}

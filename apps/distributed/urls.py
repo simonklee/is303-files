@@ -3,27 +3,32 @@ from django.views.generic.simple import direct_to_template
 
 import views as distributed_views
 
+
 urlpatterns = patterns('',
-    
-    url(r'^$', distributed_views.index,
-        {'template_name': 'distributed/index.html'},
-        name= 'index'
+    url(r'^$', direct_to_template,
+        kwargs = {'template': 'distributed/index.html'},
+        name = 'index'
     ),
-    
     url(r'^upload_simple/$', distributed_views.simple,
         kwargs = {'template_name': 'distributed/distributed_simple.html'},
         name = 'distributed_simple'
     ),
-    
+    url(r'^tasks/test/$', direct_to_template,
+        kwargs = {'template': 'distributed/distributed_test.html'},
+        name = 'suspend_test'
+    ),
+    url(r'^tasks/upload/$', distributed_views.video_upload,
+        kwargs = {'template_name': 'distributed/distributed_upload.html'},
+        name = 'video_upload'
+    ),
+    url(r'^tasks/suspend/apply/$', distributed_views.suspend_task,
+        name = 'suspend_task'
+    ),
     url(r'^tasks/suspend/(?P<task_id>(.*))/$', distributed_views.suspend_task_get,
-        kwargs = {'template_name': 'distributed/distributed_suspend.html'},
-        name = 'suspend_task_get'),
-    
-    url(r'^tasks/suspend/$', distributed_views.suspend_task,
-        kwargs = {'template_name': 'distributed/distributed_suspend.html'},
-        name = 'suspend_task'),
-    
-    url(r'^tasks/test/$', distributed_views.test,
-        kwargs = {'template_name': 'distributed/distributed_test.html'},
-        name = 'suspend_test'),
+        name = 'suspend_task_get'
+    ),
+    url(r'^tasks/suspend/$', direct_to_template,
+        kwargs = {'template': 'distributed/distributed_suspend.html'},
+        name = 'suspend'
+    ),
 )
