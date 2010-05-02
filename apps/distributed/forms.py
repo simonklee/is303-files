@@ -23,4 +23,4 @@ class VideoForm(forms.ModelForm):
 
     class Meta:
         model = Video
-        exclude = ('file_converted',)
+        exclude = ('file_converted', 'converted')

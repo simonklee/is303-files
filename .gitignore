@@ -5,6 +5,7 @@ pip-log*
 settings.py
 tmp/
 media/upload
+migrations
 *~
 #*
 *#

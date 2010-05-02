@@ -6,8 +6,9 @@ from celery.result import AsyncResult
 from celery.backends import default_backend
 from anyjson import serialize as JSON_dump
 
+from apps.distributed.models import Video
 from apps.distributed.forms import FilesForm, VideoForm
-from apps.distributed.tasks import suspend, compress
+from apps.distributed.tasks import suspend, Convert
 
 
 def simple(request, template_name, **kwargs):
@@ -34,8 +35,11 @@ def video_upload(request, **kwargs):
     response_data = dict({'form': form})
     if form.is_valid():
         video = form.save()
-        response_data.update({'task_id': compress.apply_async(args=[video.id])})
-        
+        response_data.update({'task_id': Convert().apply_async(args=[video.id])})
+    try:
+        response_data.update({'video': Video.converts.latest()})
+    except Video.DoesNotExist:
+        pass
     return render_to_response(kwargs.get('template_name'), response_data,
                               context_instance=RequestContext(request))
 
