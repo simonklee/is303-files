@@ -8,4 +8,10 @@
 </form>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}video/flowplayer-3.1.4.min.js"></script>
+
+
+<a href="/video/converted/c_mov_b.mp4" style="display:block;width:520px;height:330px" id="player"></a>
+<script>flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf");</script>
+
 {% endblock %}

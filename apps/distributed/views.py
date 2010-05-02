@@ -7,7 +7,8 @@ from celery.backends import default_backend
 from anyjson import serialize as JSON_dump
 
 from apps.distributed.forms import FilesForm, VideoForm
-from apps.distributed.tasks import suspend
+from apps.distributed.tasks import suspend, compress
+
 
 def simple(request, template_name, **kwargs):
     '''Simple file upload view.'''
@@ -23,18 +24,20 @@ def simple(request, template_name, **kwargs):
         message = 'Submit the form'
         
     return render_to_response(template_name, {'form': form, 'message': message },
-                       context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
 
 def video_upload(request, **kwargs):
     '''Upload a video, and start processing the video in a background task.
-    
     Returns the task_id for the background process.
     '''
     form = VideoForm(request.POST or None, request.FILES or None)
+    response_data = dict({'form': form})
     if form.is_valid():
-        form.save()
-    return render_to_response(kwargs.get('template_name'), {'form': form},
-                       context_instance=RequestContext(request))
+        video = form.save()
+        response_data.update({'task_id': compress.apply_async(args=[video.id])})
+        
+    return render_to_response(kwargs.get('template_name'), response_data,
+                              context_instance=RequestContext(request))
 
 def suspend_task(request):
     '''A view which executes a the ``suspend`` time task.'''

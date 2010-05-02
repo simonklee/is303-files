@@ -4,6 +4,7 @@ ve
 pip-log*
 settings.py
 tmp/
+media/upload
 *~
 #*
 *#

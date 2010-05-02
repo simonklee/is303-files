@@ -14,8 +14,8 @@ class Files(models.Model):
 
 class Video(models.Model):
     '''A model used to store video-files.'''
-    video = models.FileField(_('video'), upload_to='upload/video')
-    uploaded = models.DateField(_('time uploaded'), auto_now_add=True)
-    converted = models.FileField(_('converted video'),
+    file = models.FileField(_('video'), upload_to='upload/video')
+    file_converted = models.FileField(_('converted video'),
                                  upload_to='upload/converted_video',
-                                 blank=True, null=True)
+                                 blank=True, null=True)    
+    uploaded = models.DateTimeField(_('time uploaded'), auto_now_add=True)
