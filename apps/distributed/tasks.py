@@ -71,7 +71,6 @@ class Convert(Task):
             self._move_moov_atoms()
             self._save_cleanup()
             return True
-        return False
 
     def _save_cleanup(self):
         '''Save and cleanup.'''
