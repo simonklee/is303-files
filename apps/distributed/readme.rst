@@ -3,8 +3,7 @@ A short look at handlers
 
 
 
-djangodocs urls
-------------------
+**djangodocs urls**
 
 Overview of relevant links in django docs.
 

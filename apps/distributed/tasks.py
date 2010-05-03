@@ -1,5 +1,6 @@
 import time as ctime
 import os
+import shutil
 import subprocess
 import shlex
 import pdb
@@ -26,7 +27,7 @@ def suspend(time):
 
 class Convert(Task):
     def run(self, video_id, **kwargs):
-        '''``video_id`` should be the video-object which is converted.
+        '''``video_id`` is the id for the video which is converted.
         
         **ffmpeg one-pass CRF**:
         .. code-block:: bash
@@ -43,43 +44,56 @@ class Convert(Task):
             ffmpeg -i input.avi -pass 2 -acodec libfaac -ab 128k -ac 2 \
             -vcodec libx264 -vpre fast -b 512k -bt 512k -threads 0 output.mp4
         '''
-        #pdb.set_trace()
         try:
             self.video = Video.objects.get(pk=video_id)
         except Video.DoesNotExist, e:
             self.retry(args=[video_id], kwargs=kwargs,
                        options={'exc':exc, 'countdown':2})
-        if not os.path.exists(self.video.file.path):
-            raise ValueError()
-        self.tmp_file = '.'.join([self.video.file.path.rsplit('.', 1)[0], 'mp4'])
-        ffmpeg = ['ffmpeg',
-                  '-i', self.video.file.path,
-                  '-acodec', 'libfaac',
-                 '-ab', '128k',
-                 '-ac', '2',
-                 '-vcodec', 'libx264',
-                 '-vpre', 'slow',
-                 '-crf', '22',
-                 '-threads', '0',
-                 self.tmp_file]
+        try:        
+            (path, filename) = os.path.split(self.video.file.path)
+            (name, ext) = os.path.splitext(filename)
+            self.tmp_dir = self._mkdir(os.path.join(path, '_'.join([name, 'tmp'])))
+            self.tmp_file = os.path.join(self.tmp_dir, '.'.join([name, 'mp4']))
+            
+            ffmpeg = ['ffmpeg',
+                      '-i', self.video.file.path,
+                      '-acodec', 'libfaac',
+                     '-ab', '128k',
+                     '-ac', '2',
+                     '-vcodec', 'libx264',
+                     '-vpre', 'slow',
+                     '-crf', '22',
+                     '-threads', '0',
+                     self.tmp_file]
+            
+            ret = subprocess.call(ffmpeg)
+            if ret != 0 or not os.path.exists(self.tmp_file):
+                logging.error('Conversion error, ffmpeg returned %s' % ret)
+                raise OSError()
+            else:
+                self._move_moov_atoms()
+                self._save()
+                return True
+        finally:
+            self._clean()
     
-        ret = subprocess.call(ffmpeg)
-        if ret != 0 or not os.path.exists(self.tmp_file):
-            logging.error('Conversion error, ffmpeg returned %s' % ret)
-            raise OSError()
-        else:
-            self._move_moov_atoms()
-            self._save_cleanup()
-            return True
-
-    def _save_cleanup(self):
-        '''Save and cleanup.'''
+    def _clean(self):
+        if os.path.exists(self.tmp_dir):
+            shutil.rmtree(self.tmp_dir)
+    
+    def _mkdir(self, path, **kwargs):
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
+        return path
+    
+    def _save(self):
+        '''Delete unconverted file, save converted.'''
         self.video.file.delete()
         with open(self.tmp_file) as fp:
-            self.video.file_converted = File(fp)
+            self.video.file = File(fp)
             self.video.converted = True
             self.video.save()
-        os.remove(self.tmp_file)
     
     def _move_moov_atoms(self):
         '''Server needs the H264 file to have its moov atoms (or boxes) in front
@@ -92,6 +106,5 @@ class Convert(Task):
         $ qt-faststart <infile.mov> <outfile.mov>
         '''
         magic = Magic(mime=True)
-        if 'video/quicktime' is magic.from_file(self.tmp_file):    
-            print "mime-type was quicktime \n"
+        if 'video/quicktime' is magic.from_file(self.tmp_file):
             subprocess.call(["qt-faststart", self.tmp_file, self.tmp_file])
