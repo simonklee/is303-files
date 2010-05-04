@@ -2,10 +2,10 @@
 {% block title %}Upload Files{% endblock %}
 {% block content %}
 
-<form id=dupload enctype="multipart/form-data" method="post" action="">{% csrf_token %}
-    {{ form.as_ul }}
+<form id=dupload enctype="multipart/form-data" method="post" target=upload_target action="">
+    {% csrf_token %}
     <li>Some example-files already uploaded to the server. This will only replace
-    the upload-process, especially useful for bigger files and testing. 
+    the upload-process. 
         <ol>
             <li><input id=test-file1 name=test-file1 type=radio value=testfiles/test-file1.mov> : 
             test-file1.mov (2.9M, T ~5 sec)</li>
@@ -21,74 +21,73 @@
     </li>    
     <li><input type=submit value=upload></li>
 </form>
-<dl id=results>
-    <dt>Task ID unique for task:</dt>
-    <dd id=task_id></dd>
-    <dt>Status for task:</dt>
-    <dd id=status_val></dd>
-    <dt>Result id for task:</dt>
-    <dd id=result></dd>
-</dl>
+<ul id=results>
+
+</ul>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}video/flowplayer-3.1.4.min.js"></script>
 
-<p>{{ latest.file.url }}</p>
-
-<a href="{{ latest.file.url }}" style="display:block;width:520px;height:330px" id="player"></a>
+<a href="" style="display:block;width:520px;height:330px" id="player"></a>
 <script type="text/javascript">
 $(document).ready(function() {
-    var tasks = new Array();
+    var tasks = [];
+    
     $('#dupload').submit(function() {
         $.post("{% url video_upload %}",
-            $('#dupload').serialize(),
+            $('#dupload').serialize() + '&file=' + $('#id_file').val(),
             function(data) {
-                handleTask(data);
+                if (data.status !== 'PENDING') {
+                    throw 'Expected task status to be PENDING.';
+                }
+                tasks[data.task_id] = data.status;
             });
         return false;
     });
     
-    function handleTask(data) {
-        var task = {
-            'task_id': data.task_id,
-            'status': data.status,
+    setInterval(function() {
+        for (taskId in tasks) {
+            status(taskId);
         }
-        tasks.push(task);
-        
-        for(var i = 0; i < tasks.length; i++) {
-            tasks[i].interval_id = setInterval(getStatus(tasks[i]), 1000);
-        }
+    }, 1000);
+    
+    function status(taskId) {
+        $.getJSON('{% url suspend %}' + taskId, function(data) {
+            switch (data.status) {
+                case 'SUCCESS':
+                    console.log(taskId + ' SUCCESS.');
+                    add(data.result);
+                    delete tasks[taskId];
+                    break;
+                case 'FAILURE':
+                    console.log(taskId + ' FAILURE.');
+                    delete tasks[taskId];
+                    break;
+                case 'PENDING':
+                    break;
+                default:
+                    throw 'Status ' + data.status + ' is not supported.';
+            }
+        });
     }
-            
-    function getStatus(task) {
-        //var task = get_task(task_id);
-        return function() {
-            $.getJSON('{% url suspend %}' + task.task_id, function(data) {
-                task.status = data.status;
-                if (data.status == 'SUCCESS') {
-                    task.result = data.result;
-                    clearInterval(task.interval_id);
-                    tasks.splice(get_index(task.task_id), 1);
-                }
-                else if (data.status == 'FALIURE') {
-                    task.result = data.traceback;
-                }
-            });
-        }
+    
+    function add(id) {
+        $.getJSON('{% url video %}' + id, function(data) {
+            v = '<li><a href='+data.video_url+' id='+data.video_id'>'+data.video_name+'@'+data.video_date+'</a></li>';
+            $('#results').append(v);
+            $f().setClip(data.video_url);
+            $f().play();
+            console.log(data);
+        });
     }
-    function get_index(task_id) {
-        for (var i = 0; i < tasks.length; i++) {
-            if (tasks[i].task_id === task_id)
-                return i;
+    
+    flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf", {
+        clip: {
+            autoPlay: true, 
+            autoBuffering: true
         }
-    }
-    function get_task(task_id) {
-        for(var i = 0; i < tasks.length; i++) {
-            if (tasks[i].task_id === task_id)
-                return tasks[i];
-        }
-    }
+    });
 });
-//flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf");
+//
 </script>
 
 {% endblock %}

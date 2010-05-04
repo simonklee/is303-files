@@ -20,6 +20,9 @@ urlpatterns = patterns('',
     url(r'^tasks/upload/$', distributed_views.video_upload,
         name = 'video_upload'
     ),
+    url(r'^tasks/video/(?P<video_id>\d+)/$', distributed_views.video_get,
+        name = 'video_get'
+    ),
     url(r'^tasks/video/$', distributed_views.video,
         kwargs = {'template_name': 'distributed/distributed_upload.html'},
         name = 'video'

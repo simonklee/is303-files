@@ -36,11 +36,8 @@ def video_upload(request, **kwargs):
     Returns the task_id for the background process.
     '''
     video = None
-    response_data = dict()
-    import pdb
-    
+    response_data = dict()    
     form = VideoForm(request.POST or None, request.FILES or None)
-   
     if form.is_valid():
         video = form.save()
     elif 'test-file1' in request.POST:
@@ -51,7 +48,6 @@ def video_upload(request, **kwargs):
                 video.save()
         except IOError:
             pass
-    #pdb.set_trace()
     if video:
         res = Convert().apply_async(args=[video.id])
         response_data.update({
@@ -68,6 +64,20 @@ def video(request, **kwargs):
     response_data = dict({'form': VideoForm()})
     return render_to_response(kwargs.get('template_name'), response_data,
                               context_instance=RequestContext(request))
+
+def video_get(request, video_id):
+    response_data = dict();
+    try:
+        video = Video.objects.get(pk=video_id)
+        response_data.update({
+            'video_url': video.file.url,
+            'video_date': video.uploaded.strftime('%Y-%m-%dT%H:%M:%S'),
+            'video_id': video.id,
+            'video_name': os.path.split(video.file.name)[1]
+        })
+    except Video.DoesNotExist:
+        pass
+    return HttpResponse(JSON_dump(response_data), mimetype="application/json")
 
 def suspend_task(request):
     '''A view which executes a the ``suspend`` time task.'''
