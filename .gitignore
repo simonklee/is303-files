@@ -5,6 +5,8 @@ pip-log*
 settings.py
 tmp/
 media/upload
+media/video
+media/testfiles
 migrations
 *~
 #*

@@ -25,16 +25,13 @@ class VideoManager(models.Manager):
 class Video(models.Model):
     '''A model used to store video-files.'''
     file = models.FileField(_('video'), upload_to='upload/video')
-    #file_converted = models.FileField(_('converted video'),
-    #                             upload_to='upload/converted_video',
-    #                             blank=True, null=True)
     uploaded = models.DateTimeField(_('time uploaded'), auto_now_add=True)
     converted = models.BooleanField(_('converted'), default=False)
     objects = VideoManager()
     converts = VideoManagerConverted()
     
     def __unicode__(self):
-        return u'%s' % self.file_converted
+        return u'%s' % self.file
     
     class Meta:
         get_latest_by = 'uploaded'

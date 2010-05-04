@@ -1,6 +1,9 @@
-from django.shortcuts import render_to_response, get_object_or_404
+import os
+
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
+from django.core.files import File
 
 from celery.result import AsyncResult
 from celery.backends import default_backend
@@ -9,12 +12,13 @@ from anyjson import serialize as JSON_dump
 from apps.distributed.models import Video
 from apps.distributed.forms import FilesForm, VideoForm
 from apps.distributed.tasks import suspend, Convert
+from settings import MEDIA_ROOT
 
 
 def simple(request, template_name, **kwargs):
     '''Simple file upload view.'''
     #request.upload_handlers.insert(0, ProgressUploadHandler())
-    
+
     if request.method == 'POST':
         form = FilesForm(request.POST, request.FILES)
         message = 'invalid'
@@ -31,15 +35,34 @@ def video_upload(request, **kwargs):
     '''Upload a video, and start processing the video in a background task.
     Returns the task_id for the background process.
     '''
+    #import pdb
+    #pdb.set_trace()
     form = VideoForm(request.POST or None, request.FILES or None)
     response_data = dict({'form': form})
+   
     if form.is_valid():
-        video = form.save()
-        response_data.update({'task_id': Convert().apply_async(args=[video.id])})
-    try:
-        response_data.update({'video': Video.converts.latest()})
-    except Video.DoesNotExist:
-        pass
+        response_data['video'] = form.save()
+    
+    if 'test-file1' in request.POST:
+        try:
+            with open(os.path.join(MEDIA_ROOT, request.POST['test-file1'])) as fp:
+                video = Video()
+                video.file = File(fp)
+                video.save()
+            response_data['video'] = video
+        except IOError:
+            pass
+    #try:
+    #    response_data.update({'latest': Video.converts.latest()})
+    #except Video.DoesNotExist:
+    #    pass
+    if 'video' in response_data:
+        res = Convert().apply_async(args=[response_data['video'].id])
+        response_data['task_id'] = res.task_id
+    HttpResponse(JSON_dump(response_data), mimetype="application/json")
+    
+def video(request, **kwargs):
+    response_data = dict({'form': VideoForm()})
     return render_to_response(kwargs.get('template_name'), response_data,
                               context_instance=RequestContext(request))
 

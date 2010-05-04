@@ -11,7 +11,9 @@ class FilesForm(forms.ModelForm):
 
 class VideoForm(forms.ModelForm):
     supported_media = (
-        ('video/x-msvideo')
+        ('video/x-msvideo'),
+        ('video/x-ms-wmv'),
+        ('video/quicktime'),
     )
   
     def clean_file(self):

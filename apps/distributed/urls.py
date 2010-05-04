@@ -18,8 +18,11 @@ urlpatterns = patterns('',
         name = 'suspend_test'
     ),
     url(r'^tasks/upload/$', distributed_views.video_upload,
-        kwargs = {'template_name': 'distributed/distributed_upload.html'},
         name = 'video_upload'
+    ),
+    url(r'^tasks/video/$', distributed_views.video,
+        kwargs = {'template_name': 'distributed/distributed_upload.html'},
+        name = 'video'
     ),
     url(r'^tasks/suspend/apply/$', distributed_views.suspend_task,
         name = 'suspend_task'

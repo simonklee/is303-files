@@ -2,18 +2,50 @@
 {% block title %}Upload Files{% endblock %}
 {% block content %}
 
-<form enctype="multipart/form-data" method="post" action="{% url video_upload %}">{% csrf_token %}
+<form id=dupload enctype="multipart/form-data" method="post" action="">{% csrf_token %}
     {{ form.as_ul }}
-    <input type=submit value=upload>
+    <li>Some example-files already uploaded to the server. This will only replace
+    the upload-process, especially useful for bigger files and testing. 
+        <ol>
+            <li><input id=test-file1 name=test-file1 type=radio value=testfiles/test-file1.mov> : 
+            test-file1.mov (2.9M, T ~5 sec)</li>
+            <li><input id=test-file2 name=test-file1 type=radio value=testfiles/test-file1.avi> : 
+            test-file1.avi (3.2M, T ~5 sec)</li>
+            <li><input id=test-file3 name=test-file1 type=radio value=testfiles/planet_earth.mkv> : 
+             planet_earth.mkv (100M, T ~60 sec)</li>
+            <li><input id=test-file3 name=test-file1 type=radio value=testfiles/buggy.wmv> : 
+            buggy.wmv (7.9M, T ~60 sec)</li>
+            <li><input id=test-file4 name=test-file1 type=radio value=testfiles/herbst_720.wmv> : 
+            herbst_720.wmv (60M, T ~5 min)</li>
+        </ol>
+    </li>    
+    <li><input type=submit value=upload onclick="postForm(); return false;"></li>
 </form>
 
-<p>{{ task_id }}</p>
+<p id=task_id><p>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}video/flowplayer-3.1.4.min.js"></script>
 
-<p>{{ video.file.url }}</p>
+<p>{{ latest.file.url }}</p>
 
-<a href="{{ video.file.url }}" style="display:block;width:520px;height:330px" id="player"></a>
-<script>flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf");</script>
+<a href="{{ latest.file.url }}" style="display:block;width:520px;height:330px" id="player"></a>
+<script>
+function postForm() {
+    $.post("{% url video_upload %}", $('#dupload').serialize(),
+        function(data) {
+            $('#task_id').text(data.task_id);
+        }, 'json');
+    //$.ajax({
+    //    type: 'POST',
+    //    url: "{% url video_upload %}",
+    //    data: $('#dupload').serialize(),
+    //    success: function(data) {
+    //        $('#task_id').text(data);
+    //    },
+    //    dataType: 'json'
+    //});
+}
+//flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf");
+</script>
 
 {% endblock %}
