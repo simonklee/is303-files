@@ -35,33 +35,36 @@ def video_upload(request, **kwargs):
     '''Upload a video, and start processing the video in a background task.
     Returns the task_id for the background process.
     '''
-    #import pdb
-    #pdb.set_trace()
+    video = None
+    response_data = dict()
+    import pdb
+    
     form = VideoForm(request.POST or None, request.FILES or None)
-    response_data = dict({'form': form})
    
     if form.is_valid():
-        response_data['video'] = form.save()
-    
-    if 'test-file1' in request.POST:
+        video = form.save()
+    elif 'test-file1' in request.POST:
         try:
             with open(os.path.join(MEDIA_ROOT, request.POST['test-file1'])) as fp:
                 video = Video()
                 video.file = File(fp)
                 video.save()
-            response_data['video'] = video
         except IOError:
             pass
+    #pdb.set_trace()
+    if video:
+        res = Convert().apply_async(args=[video.id])
+        response_data.update({
+            'task_id': res.task_id,
+            'status': u'PENDING',
+        })
+    return HttpResponse(JSON_dump(response_data), mimetype="application/json")
+    
+def video(request, **kwargs):
     #try:
     #    response_data.update({'latest': Video.converts.latest()})
     #except Video.DoesNotExist:
     #    pass
-    if 'video' in response_data:
-        res = Convert().apply_async(args=[response_data['video'].id])
-        response_data['task_id'] = res.task_id
-    HttpResponse(JSON_dump(response_data), mimetype="application/json")
-    
-def video(request, **kwargs):
     response_data = dict({'form': VideoForm()})
     return render_to_response(kwargs.get('template_name'), response_data,
                               context_instance=RequestContext(request))

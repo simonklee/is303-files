@@ -46,7 +46,7 @@ class Convert(Task):
             self._ffmpeg(tmp_mov, tmp_mp4)
             self._move_moov_atoms(tmp_mp4)
             self._save(tmp_mp4)
-            return True
+            return video_id
         finally:
             self._clean()
 

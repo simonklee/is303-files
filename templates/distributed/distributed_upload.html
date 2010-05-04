@@ -19,32 +19,75 @@
             herbst_720.wmv (60M, T ~5 min)</li>
         </ol>
     </li>    
-    <li><input type=submit value=upload onclick="postForm(); return false;"></li>
+    <li><input type=submit value=upload></li>
 </form>
-
-<p id=task_id><p>
+<dl id=results>
+    <dt>Task ID unique for task:</dt>
+    <dd id=task_id></dd>
+    <dt>Status for task:</dt>
+    <dd id=status_val></dd>
+    <dt>Result id for task:</dt>
+    <dd id=result></dd>
+</dl>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}video/flowplayer-3.1.4.min.js"></script>
 
 <p>{{ latest.file.url }}</p>
 
 <a href="{{ latest.file.url }}" style="display:block;width:520px;height:330px" id="player"></a>
-<script>
-function postForm() {
-    $.post("{% url video_upload %}", $('#dupload').serialize(),
-        function(data) {
-            $('#task_id').text(data.task_id);
-        }, 'json');
-    //$.ajax({
-    //    type: 'POST',
-    //    url: "{% url video_upload %}",
-    //    data: $('#dupload').serialize(),
-    //    success: function(data) {
-    //        $('#task_id').text(data);
-    //    },
-    //    dataType: 'json'
-    //});
-}
+<script type="text/javascript">
+$(document).ready(function() {
+    var tasks = new Array();
+    $('#dupload').submit(function() {
+        $.post("{% url video_upload %}",
+            $('#dupload').serialize(),
+            function(data) {
+                handleTask(data);
+            });
+        return false;
+    });
+    
+    function handleTask(data) {
+        var task = {
+            'task_id': data.task_id,
+            'status': data.status,
+        }
+        tasks.push(task);
+        
+        for(var i = 0; i < tasks.length; i++) {
+            tasks[i].interval_id = setInterval(getStatus(tasks[i]), 1000);
+        }
+    }
+            
+    function getStatus(task) {
+        //var task = get_task(task_id);
+        return function() {
+            $.getJSON('{% url suspend %}' + task.task_id, function(data) {
+                task.status = data.status;
+                if (data.status == 'SUCCESS') {
+                    task.result = data.result;
+                    clearInterval(task.interval_id);
+                    tasks.splice(get_index(task.task_id), 1);
+                }
+                else if (data.status == 'FALIURE') {
+                    task.result = data.traceback;
+                }
+            });
+        }
+    }
+    function get_index(task_id) {
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].task_id === task_id)
+                return i;
+        }
+    }
+    function get_task(task_id) {
+        for(var i = 0; i < tasks.length; i++) {
+            if (tasks[i].task_id === task_id)
+                return tasks[i];
+        }
+    }
+});
 //flowplayer("player", "{{ MEDIA_URL }}video/flowplayer-3.1.5.swf");
 </script>
 
