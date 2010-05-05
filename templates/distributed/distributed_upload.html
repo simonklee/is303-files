@@ -1,33 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Upload Files{% endblock %}
 {% block content %}
-
+<h2>Distributed video-converting.</h2>
+<p>A distributed video-converting test which takes advantage of asynchronous task processing.
+It's possible to convert several videos at the same time. Just click upload repeatedly.
+The concurrency is limited only by the available servers to handle the video-conversion.
+In this test-setup we have one server with 4 CPU-cores, thus leaving us with a max 4
+simotaniously conversions. It's of course possible to start more then 4 conversions at once,
+but they will be queued untill resources are available.</p>
 <form id=dupload enctype="multipart/form-data" method="post" target=upload_target action="">
     {% csrf_token %}
     <li>Some example-files already uploaded to the server. This will only replace
     the upload-process. 
         <ol>
-            <li><input id=test-file1 name=test-file1 type=radio value=testfiles/test-file1.mov> : 
-            test-file1.mov (2.9M, T ~5 sec)</li>
             <li><input id=test-file2 name=test-file1 type=radio value=testfiles/test-file1.avi> : 
             test-file1.avi (3.2M, T ~5 sec)</li>
-            <li><input id=test-file3 name=test-file1 type=radio value=testfiles/planet_earth.mkv> : 
-             planet_earth.mkv (100M, T ~60 sec)</li>
+            <li><input id=test-file1 name=test-file1 type=radio value=testfiles/test-file1.mov> : 
+            test-file1.mov (2.9M, T ~15 sec)</li>
             <li><input id=test-file3 name=test-file1 type=radio value=testfiles/buggy.wmv> : 
             buggy.wmv (7.9M, T ~60 sec)</li>
+            <li><input id=test-file3 name=test-file1 type=radio value=testfiles/planet_earth.mkv> : 
+             planet_earth.mkv (100M, T ~5-8 min)</li>            
             <li><input id=test-file4 name=test-file1 type=radio value=testfiles/herbst_720.wmv> : 
             herbst_720.wmv (60M, T ~5 min)</li>
         </ol>
     </li>    
-    <li><input type=submit value=upload></li>
+    <li><input type=submit value=convert></li>
 </form>
-<ul id=results>
+<p>Video's will be added to the players playlist once converted.</p>
+<a href="" style="display:block;width:520px;height:330px" id="player"></a>
+<p>New tasks are added to the top</p>
+<ol id=results>
 
-</ul>
+</ol>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}video/flowplayer-3.1.4.min.js"></script>
 
-<a href="" style="display:block;width:520px;height:330px" id="player"></a>
 <script type="text/javascript">
 $(document).ready(function() {
     var tasks = [];
@@ -40,6 +48,8 @@ $(document).ready(function() {
                     throw 'Expected task status to be PENDING.';
                 }
                 tasks[data.task_id] = data.status;
+                $('#results').prepend('<li id=' + data.task_id + '>TaskId ' +
+                                     data.task_id + ' is PENDING</li>');
             });
         return false;
     });
@@ -54,12 +64,10 @@ $(document).ready(function() {
         $.getJSON('{% url suspend %}' + taskId, function(data) {
             switch (data.status) {
                 case 'SUCCESS':
-                    console.log(taskId + ' SUCCESS.');
-                    add(data.result);
+                    add(data.result, taskId);
                     delete tasks[taskId];
                     break;
                 case 'FAILURE':
-                    console.log(taskId + ' FAILURE.');
                     delete tasks[taskId];
                     break;
                 case 'PENDING':
@@ -70,13 +78,21 @@ $(document).ready(function() {
         });
     }
     
-    function add(id) {
+    function add(id, taskId) {
         $.getJSON('{% url video %}' + id, function(data) {
-            v = '<li><a href='+data.video_url+' id='+data.video_id'>'+data.video_name+'@'+data.video_date+'</a></li>';
-            $('#results').append(v);
-            $f().setClip(data.video_url);
-            $f().play();
-            console.log(data);
+            if($f().getPlaylist()[0].url === undefined) {
+                $f().setClip(data.video_url);
+                $f().play();
+                var pos = 0;
+            } else {
+                pos = $f().getPlaylist().length;
+                $f().addClip(data.video_url);
+            }
+            link = '<a href=# id=' + data.video_id 
+                   + ' onClick="$f().play(' + pos + ');">' 
+                   + data.video_name + '@' + data.video_id + '</a>';
+            $('#' + taskId).text('');
+            $(link).appendTo('#' + taskId);
         });
     }
     
